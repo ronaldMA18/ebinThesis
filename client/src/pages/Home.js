@@ -1,146 +1,161 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Form, message, Input } from "antd";
 import { Navigate, useNavigate } from "react-router-dom";
-import "mapbox-gl/dist/mapbox-gl.css";
 import Map, { GeolocateControl, Marker, NavigationControl } from "react-map-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
+import MapboxDirections from "@mapbox/mapbox-gl-directions/dist/mapbox-gl-directions";
+import "@mapbox/mapbox-gl-directions/dist/mapbox-gl-directions.css";
+import axios from "axios";
+// import "@mapbox/mapbox-gl-directions/dist/mapbox-gl-directions.css";
 
 function Home() {
-  const [user, setUser] = useState();
   const loggedInUser = localStorage.getItem("accessToken");
   const [authenticated, setauthenticated] = useState(loggedInUser);
 
-  const [lng, setLng] = useState(122.064845);
-  const [lat, setLat] = useState(6.919168);
+  const [lng, setLng] = useState(122.0614);
+  const [lat, setLat] = useState(6.9136);
   // 6.9192622241711526, 122.06487489487877;
   let nav = useNavigate();
 
+  const [bins, setBins] = useState([]);
+  const [logs, setLogs] = useState([]);
+
+  useEffect(() => {
+    axios.get(`${process.env.REACT_APP_API_URL}/api/bins`).then((response) => {
+      setBins(response.data);
+      console.log("bin:", response.data);
+    });
+  }, []);
+
+  useEffect(() => {
+    axios.get(`${process.env.REACT_APP_API_URL}/api/logs`).then((response) => {
+      setLogs(response.data);
+      console.log("logs:", response.data);
+    });
+  }, []);
+
   const logout = () => {
+    let values = {
+      id: localStorage.getItem("id"),
+      username: localStorage.getItem("username"),
+    };
+    axios
+      .post(`${process.env.REACT_APP_API_URL}/users/logout`, values)
+      .then((response) => {
+        setLogs(response.data);
+        console.log("logs:", response.data);
+      });
     localStorage.removeItem("accessToken");
     localStorage.removeItem("username");
     localStorage.removeItem("lName");
     localStorage.removeItem("fName");
+    localStorage.removeItem("id");
     return nav("/");
   };
 
-  // console.log(213, process.env.REACT_APP_MAPBOX_TOKEN);
   if (!authenticated) {
     return <Navigate replace to="/" />;
   } else {
     return (
       <div className="homeContainer">
         <div className="headerContainer">
-          <div>Welcome user {user}</div>
+          <div>E-Bin Online: WASTE BIN MANAGEMENT SYSTEM</div>
           <Button type="primary" onClick={logout}>
             Logout
           </Button>
         </div>
 
         <div className="bodyContainer">
-          <div className="mapStyles">
-            <Map
-              mapboxAccessToken={process.env.REACT_APP_MAPBOX_TOKEN}
-              style={{
-                width: "60vw",
-                height: "90vh",
-                border: "2px solid #4e8156",
-              }}
-              initialViewState={{
-                longitude: lng,
-                latitude: lat,
-                zoom: 12,
-              }}
-              mapStyle="mapbox://styles/mapbox/streets-v9"
-            >
-              <Marker
-                longitude={122.0614}
-                latitude={6.9136}
-                color="white"
-                style={{
-                  color: "green",
-                }}
-              >
-                <link
-                  rel="stylesheet"
-                  href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,700,1,200"
-                />
-                BIN1
-                <span class="material-symbols-outlined">delete</span>
-              </Marker>
-
-              <Marker
-                longitude={122.0615}
-                latitude={6.9137}
-                color="white"
-                style={{
-                  color: "green",
-                }}
-              >
-                <link
-                  rel="stylesheet"
-                  href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,700,1,200"
-                />
-                BIN2
-                <span class="material-symbols-outlined">delete</span>
-              </Marker>
-
-              <Marker
-                longitude={122.0616}
-                latitude={6.9138}
-                color="white"
-                style={{
-                  color: "green",
-                }}
-              >
-                <link
-                  rel="stylesheet"
-                  href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,700,1,200"
-                />
-                BIN3
-                <span class="material-symbols-outlined">delete</span>
-              </Marker>
-
-              <Marker
-                longitude={122.0616}
-                latitude={6.9139}
-                color="white"
-                style={{
-                  color: "green",
-                }}
-              >
-                <link
-                  rel="stylesheet"
-                  href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,700,1,200"
-                />
-                BIN4
-                <span class="material-symbols-outlined">delete</span>
-              </Marker>
-
-              <Marker
-                longitude={122.0614}
-                latitude={6.9137}
-                color="white"
-                style={{
-                  color: "green",
-                }}
-              >
-                <link
-                  rel="stylesheet"
-                  href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,700,1,200"
-                />
-                BIN5
-                <span class="material-symbols-outlined">delete</span>
-              </Marker>
-
-              <NavigationControl />
-              <GeolocateControl />
-            </Map>
+          <div className="dashboard">
+            <h3>miniDashboard</h3>
+            <div className="person">
+              <span class="material-symbols-outlined">person</span>
+              {localStorage.getItem("username")}
+            </div>
+            <div className="trash">
+              <span class="material-symbols-outlined">delete</span>
+              {bins.length}
+            </div>
+            <div className="full">
+              <span class="material-symbols-outlined">
+                <span class="material-symbols-outlined">water_full</span>
+              </span>
+              {bins.filter((x) => x.status === 1).length}
+            </div>
           </div>
 
-          <div className="statistics">
-            <p>User: {user}</p>
-            <p>STATISTICS</p>
-            <p>Number of bin: 1</p>
-            <p>Full bin: 0</p>
+          <div className="mapContainer">
+            <div className="mapStyles">
+              <Map
+                mapboxAccessToken={process.env.REACT_APP_MAPBOX_TOKEN}
+                style={{
+                  width: "60vw",
+                  height: "90vh",
+                  border: "2px solid #4e8156",
+                }}
+                initialViewState={{
+                  longitude: lng,
+                  latitude: lat,
+                  zoom: 16,
+                }}
+                mapStyle="mapbox://styles/mapbox/streets-v9"
+              >
+                {/* <MapboxDirections
+                  accessToken={process.env.REACT_APP_MAPBOX_TOKEN}
+                  unit="metric"
+                  profile="mapbox/walking"
+                /> */}
+
+                {bins.map((b) => {
+                  return (
+                    <Marker
+                      longitude={parseFloat(b.long)}
+                      latitude={parseFloat(b.lat)}
+                      color="white"
+                      style={{
+                        color: b.id === 1 ? "green" : "blue",
+                      }}
+                    >
+                      <link
+                        rel="stylesheet"
+                        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,700,1,200"
+                      />
+                      {b.locationName}
+                      <span class="material-symbols-outlined">delete</span>
+                    </Marker>
+                  );
+                })}
+
+                <NavigationControl />
+                <GeolocateControl />
+              </Map>
+            </div>
+          </div>
+
+          <div className="logs">
+            <div>
+              <h2>Activity Log</h2>
+              <table>
+                <thead>
+                  <tr class>
+                    <th></th>
+                    <th>Activity</th>
+                    <th>Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {logs.map((log, i) => (
+                    <tr key={log.id}>
+                      <>
+                        <td>{i === 0 ? "latest:" : ""}</td>
+                        <td>{log.activity}</td>
+                        <td>| {new Date(log.dateCreated).toLocaleString()}</td>
+                      </>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

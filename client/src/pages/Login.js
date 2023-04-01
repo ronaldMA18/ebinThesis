@@ -3,7 +3,6 @@ import { Button, Form, message, Input } from "antd";
 import { Navigate, useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const API = "http://localhost:3001";
 const axiosInstance = axios.create({
   baseURL: process.env.REACT_APP_API_URL,
 });
@@ -16,7 +15,7 @@ function Login() {
   const [authenticated, setauthenticated] = useState(loggedInUser);
 
   const onFinish = (values) => {
-    axiosInstance.post(`/users/login`, values).then((response) => {
+    axiosInstance.post(`users/login`, values).then((response) => {
       if (response.data.error) {
         messageApi.open({
           type: "error",
@@ -31,6 +30,7 @@ function Login() {
         localStorage.setItem("username", values.username);
         localStorage.setItem("lName", response.data.lName);
         localStorage.setItem("fName", response.data.fName);
+        localStorage.setItem("id", response.data.id);
         return nav("/home");
       }
     });
