@@ -8,6 +8,14 @@ import "@mapbox/mapbox-gl-directions/dist/mapbox-gl-directions.css";
 import axios from "axios";
 // import "@mapbox/mapbox-gl-directions/dist/mapbox-gl-directions.css";
 
+const axiosInstance1 = axios.create({
+  baseURL: process.env.REACT_APP_API_URL,
+});
+
+const axiosInstance2 = axios.create({
+  baseURL: process.env.REACT_APP_USR_URL,
+});
+
 function Home() {
   const loggedInUser = localStorage.getItem("accessToken");
   const [authenticated, setauthenticated] = useState(loggedInUser);
@@ -21,14 +29,14 @@ function Home() {
   const [logs, setLogs] = useState([]);
 
   useEffect(() => {
-    axios.get(`${process.env.REACT_APP_API_URL}/api/bins`).then((response) => {
+    axiosInstance1.get(`/bins`).then((response) => {
       setBins(response.data);
       console.log("bin:", response.data);
     });
   }, []);
 
   useEffect(() => {
-    axios.get(`${process.env.REACT_APP_API_URL}/api/logs`).then((response) => {
+    axiosInstance1.get(`/logs`).then((response) => {
       setLogs(response.data);
       console.log("logs:", response.data);
     });
@@ -39,12 +47,10 @@ function Home() {
       id: localStorage.getItem("id"),
       username: localStorage.getItem("username"),
     };
-    axios
-      .post(`${process.env.REACT_APP_API_URL}/users/logout`, values)
-      .then((response) => {
-        setLogs(response.data);
-        console.log("logs:", response.data);
-      });
+    axiosInstance2.post(`/logout`, values).then((response) => {
+      setLogs(response.data);
+      console.log("logs:", response.data);
+    });
     localStorage.removeItem("accessToken");
     localStorage.removeItem("username");
     localStorage.removeItem("lName");
@@ -127,7 +133,7 @@ function Home() {
                 })}
 
                 <NavigationControl />
-                <GeolocateControl />
+                {/* <GeolocateControl /> */}
               </Map>
             </div>
           </div>

@@ -3,8 +3,12 @@ import { Button, Form, message, Input } from "antd";
 import { Navigate, useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const axiosInstance = axios.create({
+const axiosInstance1 = axios.create({
   baseURL: process.env.REACT_APP_API_URL,
+});
+
+const axiosInstance2 = axios.create({
+  baseURL: process.env.REACT_APP_USR_URL,
 });
 
 function Login() {
@@ -15,7 +19,7 @@ function Login() {
   const [authenticated, setauthenticated] = useState(loggedInUser);
 
   const onFinish = (values) => {
-    axiosInstance.post(`users/login`, values).then((response) => {
+    axiosInstance2.post(`/login`, values).then((response) => {
       if (response.data.error) {
         messageApi.open({
           type: "error",

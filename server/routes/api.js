@@ -40,7 +40,7 @@ router.post("/data", async (req, res) => {
   const data = req.body;
   console.log("data here:", data);
 
-  await ebin.update(
+  await ebins.update(
     {
       status: data.status,
     },
